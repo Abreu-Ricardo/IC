@@ -1,23 +1,8 @@
 # Programador: Ricardo Abreu
-# Descricao: Calcula a maior subseq entre duas strings.
-# Sendo a primeira String a maior
+# Descricao: Computa a maior subseq entre duas strings.
+# e imprime a maior cadeia comum
 
-# OBS: COLOCAR A MAIOR STRING PRIMEIRO
 
-def verifica_ordem(matriz, tamX, tamY, verificar, a, b):    # Verifica se na colina tem o caractere "verificar", pois se nao tiver nao pode incrementar na matriz
-    flag = 0
-
-    for i in range(2,a):
-        #for j in range(2,b):
-            if matriz[a][0] == verificar:               # Se for vdd entao pode incrementar na matriz
-                flag = 1
-                return flag                             # O caractere existe entao pode voltar
-                
-            else:
-                flag = -1
-    return flag
-
-    
 def sub_seq(X, Y):
     tamX = len(X)+2
     tamY = len(Y)+2
@@ -38,52 +23,28 @@ def sub_seq(X, Y):
     for i in range(2,tamY):     # Comeca a partir do 2, pq tam +2 da matriz
         for j in range(2,tamX):
             
-            if  matriz[i][0] == matriz[0][j]:         #### Caso a primeira coluna for igual a um item da linha
+            if  matriz[i][0] == matriz[0][j]:                               #### Caso a primeira coluna for igual a um item da linha
 
-                flag = verifica_ordem(matriz, tamX, tamY, matriz[i][0], i ,j)
-                
-                if flag >= 0:
                     cont = matriz[i-1][j-1] + 1                 # Recebe a diagonal mais 1
-
-                else:
-                    cont = 0                                    # Se n estiver na ordem correta
             
-            elif matriz[i][0] == matriz[0][j] and matriz[0][j] != palavra:  ### Se liha e coluna forem iguais, mas tem que ser diferente do ultimo caratere igual(palavra)
-
-                flag = verifica_ordem(matriz, tamX, tamY, matriz[i][0], i ,j)
+            elif matriz[i][0] == matriz[0][j] and matriz[0][j] != palavra:  #### Se liha e coluna forem iguais, mas tem que ser diferente do ultimo caratere igual(palavra)
                 
-                if flag >= 0:
                     palavra = matriz[0][j]                      # Recebe o caratere da linha 0 com a coluna j
                     cont = cont + 1
-                
-                else:  
-                    cont = 0                                    # Se n estiver na ordem correta
             
-            elif matriz[i][j-1] >= matriz[i-1][j]:
+            elif matriz[i][j-1] >= matriz[i-1][j]:                          #### Compara uma posicao anterior eh maior que a posicao de cima 
 
-                flag = verifica_ordem(matriz, tamX, tamY, matriz[i][0], i ,j)
-
-                if flag >= 0:
                     cont = matriz[i][j-1]
 
-                else:
-                    cont = 0                                    # Se n estiver na ordem correta
-            
-            elif matriz[i][j-1] <= matriz[i-1][j]:
+            elif matriz[i][j-1] <= matriz[i-1][j]:                          #### Compara uma posicao anterior eh menor que a posicao de cima
 
-                flag = verifica_ordem(matriz, tamX, tamY, matriz[i][0], i ,j)
-                
-                if flag >= 0:
                     cont = matriz[i-1][j]
-                
-                else:
-                    cont = 0                                    # Se n estiver na ordem correta
 
             matriz[i][j] = cont                                 # matriz sempre recebe cont(que varia com os condicionais) 
 
     return matriz
 
-def maior_seq(matriz, tamX, tamY):
+def maior_seq(matriz, tamX, tamY):      #### Percorre a matriz e guarda no array vetor
     vetor = []
 
     for i in range(tamY):
