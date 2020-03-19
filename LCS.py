@@ -8,7 +8,7 @@ def verifica_ordem(matriz, tamX, tamY, verificar, a, b):    # Verifica se na col
     flag = 0
 
     for i in range(2,a):
-        for j in range(2,b):
+        #for j in range(2,b):
             if matriz[a][0] == verificar:               # Se for vdd entao pode incrementar na matriz
                 flag = 1
                 return flag                             # O caractere existe entao pode voltar
@@ -38,7 +38,7 @@ def sub_seq(X, Y):
     for i in range(2,tamY):     # Comeca a partir do 2, pq tam +2 da matriz
         for j in range(2,tamX):
             
-            if j == 2 and matriz[i][0] == matriz[0][j]:         #### Caso a primeira coluna for igual a um item da linha
+            if  matriz[i][0] == matriz[0][j]:         #### Caso a primeira coluna for igual a um item da linha
 
                 flag = verifica_ordem(matriz, tamX, tamY, matriz[i][0], i ,j)
                 
