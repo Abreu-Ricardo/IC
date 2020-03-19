@@ -8,7 +8,6 @@ def sub_seq(X, Y):
     tamY = len(Y)+2
     cont = 0               # Preenche Matriz
     palavra = None         # Salva o ultimo igual caractere da sequencia
-    flag = 1
 
     
     matriz = [[0 for x in range(tamX)] for j in range(tamY)]       # Declaracao da matriz
