@@ -21,7 +21,7 @@ for aux in arquivo:
             elif pept1.string != pept2.string:
                 resultado = LCS.sub_seq(pept1, pept2)
 
-                if len(pept2.string) < len(resultado):
+                if len(pept2.string) < len(resultado):  # Com '>' acha o menor em comum, com '<' o maior em comum
                     pept2.string = resultado
 
     except EOFError:        ### FIM DO ARQUIVO
