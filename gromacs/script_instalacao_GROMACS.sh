@@ -17,5 +17,7 @@ source /usr/local/gromacs/bin/GMXRC;
 # Make e Cmake
 # fftw - Biblioteca de transformacoes de Fourier
 # libc-dev
+
+###### Se tiver GPU e nao for NVIDIA usar o que esta embaixo
 ## sudo apt update
 ## sudo apt install ocl-icd-opencl-dev
