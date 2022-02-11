@@ -15,7 +15,7 @@
 # contenham HOH, assim o arquivo ARQUIVO_clean.pdb
 # nao tera HOH. 
 
-grep -v HOH Pept_14aa.pdb > Pept_14aa_clean.pdb;
+grep -v HOH Pept_16aa.pdb > Pept_16aa_clean.pdb;
 
 
 ##### 2- Preparar os arquivos para poder fazer as simulacoes #####
@@ -32,7 +32,7 @@ grep -v HOH Pept_14aa.pdb > Pept_14aa_clean.pdb;
 # irao ser exibidos para a escolha. Escolha uma das opcoes de forca
 # (o exemplo usa a de numero 15-OPLS-AA/L)   
 
-gmx pdb2gmx -f Pept_14aa_clean.pdb -o Pept_14aa_processed.gro -water spce;
+gmx pdb2gmx -f Pept_16aa_clean.pdb -o Pept_16aa_processed.gro -water spce;
 
 # Explicando os parametros utilizados (ex:-water spce)
 # "-f"(file): Indica que sera passado um arquivo(file), apos esse parametro
@@ -63,7 +63,7 @@ gmx pdb2gmx -f Pept_14aa_clean.pdb -o Pept_14aa_processed.gro -water spce;
 # 1- Definir as dimensoes da caixa usando o editconf
 # 2- Encher a caixa com agua usando o solvente.
 
-gmx editconf -f Pept_14aa_processed.gro -o Pept_14aa_newbox.gro -c -d 1.0 -bt cubic;
+gmx editconf -f Pept_16aa_processed.gro -o Pept_16aa_newbox.gro -c -d 1.0 -bt cubic;
 
 # Parametros
 # "-c": Centraliza a molecula na caixa
@@ -73,7 +73,7 @@ gmx editconf -f Pept_14aa_processed.gro -o Pept_14aa_newbox.gro -c -d 1.0 -bt cu
 # "-bt" Define o tipo de caixa, pode ser: cubic, triclinic, dodecahedron, octahedron
 
 
-gmx solvate -cp Pept_14aa_newbox.gro -cs spc216.gro -o Pept_14aa_solv.gro -p topol.top;
+gmx solvate -cp Pept_16aa_newbox.gro -cs spc216.gro -o Pept_16aa_solv.gro -p topol.top;
 
 # Parametros:
 # "-cp": A configuracao da proteina a ser especificada, contida no arquivo
@@ -98,12 +98,12 @@ gmx solvate -cp Pept_14aa_newbox.gro -cs spc216.gro -o Pept_14aa_solv.gro -p top
 # IMPORTANTE: os arquivos .mdp foram feitos para serem usados
 # com o campo de forca OPLS-AA
 
-gmx grompp -f ions.mdp -c Pept_14aa_solv.gro -p topol.top -o ions.tpr;
+gmx grompp -f ions.mdp -c Pept_16aa_solv.gro -p topol.top -o ions.tpr;
  
 # Agora temos uma descrição em nível atômico do nosso sistema no 
 # arquivo binário ions.tpr. Vamos passar este arquivo para o genion
 
-gmx genion -s ions.tpr -o Pept_14aa_solv_ions.gro -p topol.top -pname NA -nname CL -neutral;
+gmx genion -s ions.tpr -o Pept_16aa_solv_ions.gro -p topol.top -pname NA -nname CL -neutral;
 
 
 # Apos executada a linha acima, varias opcoes irao aparecer,
@@ -133,7 +133,7 @@ gmx genion -s ions.tpr -o Pept_14aa_solv_ions.gro -p topol.top -pname NA -nname 
 # IMPORTANTE DE NOVO OUTRO ARQUIVO ESPECIFICO DADO PELO TUTORIAL
 # (minim.mdp = http://www.mdtutorials.com/gmx/lysozyme/Files/minim.mdp)
 
-gmx grompp -f minim.mdp -c Pept_14aa_solv_ions.gro -p topol.top -o em.tpr;
+gmx grompp -f minim.mdp -c Pept_16aa_solv_ions.gro -p topol.top -o em.tpr;
 
 # Agora podemos chamar o parametrp mdrun para iniciar a minimizacao de energia
 gmx mdrun -v -deffnm em;
@@ -292,4 +292,4 @@ gmx rms -s em.tpr -f md_0_1_noPBC.xtc -o rmsd_xtal.xvg -tu ns;
 # seu Rg mudará com o tempo. Vamos analisar o raio de giração da 
 # lisozima em nossa simulação:
 
-gmx gyrate -s md_0_1.tpr -f md_0_1_noPBC.xtc -o gyrate.xvg;
+#gmx gyrate -s md_0_1.tpr -f md_0_1_noPBC.xtc -o gyrate.xvg;
