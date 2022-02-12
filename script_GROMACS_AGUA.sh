@@ -299,3 +299,8 @@ gmx rms -s em.tpr -f md_0_1_noPBC.xtc -o rmsd_xtal.xvg -tu ns;
 gmx gyrate -s md_0_1.tpr -f md_0_1_noPBC.xtc -o gyrate.xvg;
 # Escolha 1  para Proteina
 
+
+# LINHA PARA EDITAR CRIAR O ARQUIVO PDB
+#gmx trjconv -s md_0_1.tpr -f md_0_1.xtc -dump 1000 -o Pept_12.pdb;
+
+# -dump é o paramêtro que define o tempo em que irá gerar o arquivo pdb
