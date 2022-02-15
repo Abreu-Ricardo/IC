@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 # Script para fazer simulacoes em agua usando a ferramenta gromacs no Linux
 # Site para tutorial de GROMACS: http://www.mdtutorials.com/gmx/
@@ -7,7 +7,10 @@
 # e criar um diretorio com o nome da sequencia, para
 # todos os arquivos serem escritos la
 
+molecula="Pept_12aa.pdb";
 
+molecula_sem_extensao=${molecula%.pdb};
+molecula_clean=$molecula_sem_extensao"_clean.pdb";
 
 ##### 1 - Limpar o arquivo de moleculas de HOH #####
 # Usando o programa grep para realizar essa tarefa
@@ -15,7 +18,7 @@
 # contenham HOH, assim o arquivo ARQUIVO_clean.pdb
 # nao tera HOH. 
 
-grep -v HOH Pept_12aa.pdb > Pept_12aa_clean.pdb;
+grep -v HOH $molecula > $molecula_clean;
 
 
 ##### 2- Preparar os arquivos para poder fazer as simulacoes #####
@@ -30,9 +33,14 @@ grep -v HOH Pept_12aa.pdb > Pept_12aa_clean.pdb;
 
 # Apos executado o comando abaixo, varias opcoes de campos de forca 
 # irao ser exibidos para a escolha. Escolha uma das opcoes de forca
-# (o exemplo usa a de numero 15-OPLS-AA/L)   
+# (o exemplo usa a de numero 15-OPLS-AA/L)  
 
-gmx pdb2gmx -f Pept_12aa_clean.pdb -o Pept_12aa_processed.gro -water spce;
+
+molecula_processed=${molecula_clean%clean*}"processed.gro"
+
+echo $molecula_processed;
+
+gmx pdb2gmx -f $molecula_clean -o $molecula_processed -water spce;
 
 # Explicando os parametros utilizados (ex:-water spce)
 # "-f"(file): Indica que sera passado um arquivo(file), apos esse parametro
@@ -63,7 +71,11 @@ gmx pdb2gmx -f Pept_12aa_clean.pdb -o Pept_12aa_processed.gro -water spce;
 # 1- Definir as dimensoes da caixa usando o editconf
 # 2- Encher a caixa com agua usando o solvente.
 
-gmx editconf -f Pept_12aa_processed.gro -o Pept_12aa_newbox.gro -c -d 1.0 -bt cubic;
+
+molecula_newbox=${molecula%.pdb*}"_newbox.gro";
+echo $molecula_newbox;
+
+gmx editconf -f $molecula_processed -o $molecula_newbox -c -d 1.0 -bt cubic;
 
 # Parametros
 # "-c": Centraliza a molecula na caixa
@@ -72,15 +84,17 @@ gmx editconf -f Pept_12aa_processed.gro -o Pept_12aa_newbox.gro -c -d 1.0 -bt cu
 
 # "-bt" Define o tipo de caixa, pode ser: cubic, triclinic, dodecahedron, octahedron
 
+molecula_solv=${molecula%.pdb*}"_solv.gro";
+echo $molecula_solv;
 
-gmx solvate -cp Pept_12aa_newbox.gro -cs spc216.gro -o Pept_12aa_solv.gro -p topol.top;
+gmx solvate -cp $molecula_newbox -cs spc216.gro -o $molecula_solv -p topol.top;
 
 # Parametros:
 # "-cp": A configuracao da proteina a ser especificada, contida no arquivo
 # processado anteirormente
 
-
 # "-cs": Configuracao do solvente, configuracao padrao do GROMACS
+
 
 ##### 4- Adicionar ions #####
 
@@ -98,13 +112,16 @@ gmx solvate -cp Pept_12aa_newbox.gro -cs spc216.gro -o Pept_12aa_solv.gro -p top
 # IMPORTANTE: os arquivos .mdp foram feitos para serem usados
 # com o campo de forca OPLS-AA
 
-gmx grompp -f ions.mdp -c Pept_12aa_solv.gro -p topol.top -o ions.tpr;
- 
+
+gmx grompp -f ions.mdp -c $molecula_solv -p topol.top -o ions.tpr;
+
 # Agora temos uma descrição em nível atômico do nosso sistema no 
 # arquivo binário ions.tpr. Vamos passar este arquivo para o genion
 
-gmx genion -s ions.tpr -o Pept_12aa_solv_ions.gro -p topol.top -pname NA -nname CL -neutral;
+molecula_solv_ions=${molecula%.pdb*}"_solv_ions.gro";
+echo $molecula_solv_ions;
 
+gmx genion -s ions.tpr -o $molecula_solv_ions -p topol.top -pname NA -nname CL -neutral;
 
 # Apos executada a linha acima, varias opcoes irao aparecer,
 # no tutorial usa-se a opcao 13 "SOL", para incorporar os ions.
@@ -133,10 +150,12 @@ gmx genion -s ions.tpr -o Pept_12aa_solv_ions.gro -p topol.top -pname NA -nname 
 # IMPORTANTE DE NOVO OUTRO ARQUIVO ESPECIFICO DADO PELO TUTORIAL
 # (minim.mdp = http://www.mdtutorials.com/gmx/lysozyme/Files/minim.mdp)
 
-gmx grompp -f minim.mdp -c Pept_12aa_solv_ions.gro -p topol.top -o em.tpr;
+gmx grompp -f minim.mdp -c $molecula_solv_ions -p topol.top -o em.tpr;
+
 
 # Agora podemos chamar o parametrp mdrun para iniciar a minimizacao de energia
 gmx mdrun -v -deffnm em;
+
 
 # Parametros
 # "-v": Imprime os passos que estao sendo realizados
@@ -238,69 +257,3 @@ gmx energy -f npt.edr -o pressure.xvg;
 # Olhando para a densidade tambem, usando a energia
 # digitando "24 0"
 gmx energy -f npt.edr -o density.xvg;
-
-
-
-
-##### 7- Producao da Dinamica Molecular #####
-
-# Após a conclusão das duas fases de equilíbrio, o sistema está 
-# agora bem equilibrado na temperatura e pressão desejadas. Agora 
-# estamos prontos para liberar as restrições de posição e executar 
-# o MD de produção para coleta de dados. O processo é exatamente 
-# como vimos antes, pois usaremos o arquivo de ponto de verificação 
-# (que neste caso agora contém informações de acoplamento de pressão 
-# preservadas) para grompp
-
-# USA ARQUIVO .mdp(md.mdp = http://www.mdtutorials.com/gmx/lysozyme/Files/md.mdp)
-gmx grompp -f md.mdp -c npt.gro -t npt.cpt -p topol.top -o md_0_1.tpr;
-
-# Rodar a simulacao agora
-gmx mdrun -deffnm md_0_1;
-
-
-##### 8- ANALISE  #####
-# Agora que simulamos nossa proteína, devemos executar algumas análises no sistema. 
-# Que tipos de dados são importantes? Essa é uma pergunta importante a ser feita antes de executar 
-# a simulação, portanto, você deve ter algumas ideias sobre os tipos de dados que deseja coletar 
-# em seus próprios sistemas. Para este tutorial, algumas ferramentas básicas serão introduzidas.
-
-# O primeiro é o trjconv, que é usado como uma ferramenta de pós-processamento para remover 
-# coordenadas, corrigir a periodicidade ou alterar manualmente a trajetória (unidades de tempo, 
-# frequência de quadros, etc). Para este exercício, usaremos trjconv para contabilizar qualquer 
-# periodicidade no sistema. A proteína se difundirá através da célula unitária e pode parecer 
-# "quebrada" ou "saltar" para o outro lado da caixa. Para explicar esses comportamentos, emita o 
-# seguinte:
-
-gmx trjconv -s md_0_1.tpr -f md_0_1.xtc -o md_0_1_noPBC.xtc -pbc mol -center;
-# Selecione 1 ("Proteína") como o grupo a ser centralizado e 0 ("Sistema") para saída. 
-# Faremos todas as nossas análises nesta trajetória "corrigida". Vejamos primeiro a estabilidade 
-# estrutural. GROMACS tem um utilitário embutido para cálculos RMSD chamado rms. Para usar rms, 
-# emita este comando:
-
-
-gmx rms -s md_0_1.tpr -f md_0_1_noPBC.xtc -o rmsd.xvg -tu ns;
-# Escolha 4 ("Backbone") para o ajuste de mínimos quadrados e o grupo para cálculo de RMSD. 
-# O sinalizador -tu exibirá os resultados em termos de ns, mesmo que a trajetória tenha sido 
-# escrita em ps. Isso é feito para clareza da saída (especialmente se você tiver uma simulação 
-# longa - 1e+05 ps não parece tão bom quanto 100 ns). O gráfico de saída mostrará o RMSD em relação 
-# à estrutura presente no s minimizado e equilibrado
-
-# If we wish to calculate RMSD relative to the crystal structure, we could issue the following:
-
-gmx rms -s em.tpr -f md_0_1_noPBC.xtc -o rmsd_xtal.xvg -tu ns;
-
-
-# O raio de giração de uma proteína é uma medida de sua compacidade. Se uma 
-# proteína for dobrada de forma estável, provavelmente manterá um valor relativamente estável 
-# de Rg. Se uma proteína se desdobrar, seu Rg mudará com o tempo. Vamos analisar o raio de giração 
-# da lisozima em nossa simulação:
-
-gmx gyrate -s md_0_1.tpr -f md_0_1_noPBC.xtc -o gyrate.xvg;
-# Escolha 1  para Proteina
-
-
-# LINHA PARA EDITAR CRIAR O ARQUIVO PDB
-#gmx trjconv -s md_0_1.tpr -f md_0_1.xtc -dump 1000 -o Pept_12.pdb;
-
-# -dump é o paramêtro que define o tempo em que irá gerar o arquivo pdb
