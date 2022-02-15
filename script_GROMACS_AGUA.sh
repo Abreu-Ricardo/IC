@@ -257,3 +257,67 @@ gmx energy -f npt.edr -o pressure.xvg;
 # Olhando para a densidade tambem, usando a energia
 # digitando "24 0"
 gmx energy -f npt.edr -o density.xvg;
+
+##### 7- Producao da Dinamica Molecular #####
+
+# Após a conclusão das duas fases de equilíbrio, o sistema está 
+# agora bem equilibrado na temperatura e pressão desejadas. Agora 
+# estamos prontos para liberar as restrições de posição e executar 
+# o MD de produção para coleta de dados. O processo é exatamente 
+# como vimos antes, pois usaremos o arquivo de ponto de verificação 
+# (que neste caso agora contém informações de acoplamento de pressão 
+# preservadas) para grompp
+
+# USA ARQUIVO .mdp(md.mdp = http://www.mdtutorials.com/gmx/lysozyme/Files/md.mdp)
+gmx grompp -f md.mdp -c npt.gro -t npt.cpt -p topol.top -o md_0_1.tpr;
+
+# Rodar a simulacao agora
+gmx mdrun -deffnm md_0_1;
+
+
+##### 8- ANALISE  #####
+# Agora que simulamos nossa proteína, devemos executar algumas análises no sistema. 
+# Que tipos de dados são importantes? Essa é uma pergunta importante a ser feita antes de executar 
+# a simulação, portanto, você deve ter algumas ideias sobre os tipos de dados que deseja coletar 
+# em seus próprios sistemas. Para este tutorial, algumas ferramentas básicas serão introduzidas.
+
+# O primeiro é o trjconv, que é usado como uma ferramenta de pós-processamento para remover 
+# coordenadas, corrigir a periodicidade ou alterar manualmente a trajetória (unidades de tempo, 
+# frequência de quadros, etc). Para este exercício, usaremos trjconv para contabilizar qualquer 
+# periodicidade no sistema. A proteína se difundirá através da célula unitária e pode parecer 
+# "quebrada" ou "saltar" para o outro lado da caixa. Para explicar esses comportamentos, emita o 
+# seguinte:
+
+gmx trjconv -s md_0_1.tpr -f md_0_1.xtc -o md_0_1_noPBC.xtc -pbc mol -center;
+# Selecione 1 ("Proteína") como o grupo a ser centralizado e 0 ("Sistema") para saída. 
+# Faremos todas as nossas análises nesta trajetória "corrigida". Vejamos primeiro a estabilidade 
+# estrutural. GROMACS tem um utilitário embutido para cálculos RMSD chamado rms. Para usar rms, 
+# emita este comando:
+
+
+gmx rms -s md_0_1.tpr -f md_0_1_noPBC.xtc -o rmsd.xvg -tu ns;
+# Escolha 4 ("Backbone") para o ajuste de mínimos quadrados e o grupo para cálculo de RMSD. 
+# O sinalizador -tu exibirá os resultados em termos de ns, mesmo que a trajetória tenha sido 
+# escrita em ps. Isso é feito para clareza da saída (especialmente se você tiver uma simulação 
+# longa - 1e+05 ps não parece tão bom quanto 100 ns). O gráfico de saída mostrará o RMSD em relação 
+# à estrutura presente no s minimizado e equilibrado
+
+# If we wish to calculate RMSD relative to the crystal structure, we could issue the following:
+
+gmx rms -s em.tpr -f md_0_1_noPBC.xtc -o rmsd_xtal.xvg -tu ns;
+
+
+# O raio de giração de uma proteína é uma medida de sua compacidade. Se uma 
+# proteína for dobrada de forma estável, provavelmente manterá um valor relativamente estável 
+# de Rg. Se uma proteína se desdobrar, seu Rg mudará com o tempo. Vamos analisar o raio de giração 
+# da lisozima em nossa simulação:
+
+gmx gyrate -s md_0_1.tpr -f md_0_1_noPBC.xtc -o gyrate.xvg;
+# Escolha 1  para Proteina
+
+molecula_pdb_final=${molecula%.pdb*}"_FINAL.pdb"
+
+# LINHA PARA EDITAR CRIAR O ARQUIVO PDB
+gmx trjconv -s md_0_1.tpr -f md_0_1.xtc -dump 1000 -o $molecula_pdb_final;
+
+# -dump é o paramêtro que define o tempo em que irá gerar o arquivo pdb
