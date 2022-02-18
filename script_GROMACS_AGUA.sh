@@ -7,7 +7,8 @@
 # e criar um diretorio com o nome da sequencia, para
 # todos os arquivos serem escritos la
 
-molecula="Pept_12aa.pdb";
+################# Pegando o primeiro paramêtro(nome do arquivo .pdb) 
+molecula=$1;
 
 molecula_sem_extensao=${molecula%.pdb};
 molecula_clean=$molecula_sem_extensao"_clean.pdb";
@@ -40,7 +41,7 @@ molecula_processed=${molecula_clean%clean*}"processed.gro"
 
 echo $molecula_processed;
 
-gmx pdb2gmx -f $molecula_clean -o $molecula_processed -water spce;
+time gmx pdb2gmx -f $molecula_clean -o $molecula_processed -water spce;
 
 # Explicando os parametros utilizados (ex:-water spce)
 # "-f"(file): Indica que sera passado um arquivo(file), apos esse parametro
@@ -75,7 +76,7 @@ gmx pdb2gmx -f $molecula_clean -o $molecula_processed -water spce;
 molecula_newbox=${molecula%.pdb*}"_newbox.gro";
 echo $molecula_newbox;
 
-gmx editconf -f $molecula_processed -o $molecula_newbox -c -d 1.0 -bt cubic;
+time gmx editconf -f $molecula_processed -o $molecula_newbox -c -d 1.0 -bt cubic;
 
 # Parametros
 # "-c": Centraliza a molecula na caixa
@@ -87,7 +88,7 @@ gmx editconf -f $molecula_processed -o $molecula_newbox -c -d 1.0 -bt cubic;
 molecula_solv=${molecula%.pdb*}"_solv.gro";
 echo $molecula_solv;
 
-gmx solvate -cp $molecula_newbox -cs spc216.gro -o $molecula_solv -p topol.top;
+time gmx solvate -cp $molecula_newbox -cs spc216.gro -o $molecula_solv -p topol.top;
 
 # Parametros:
 # "-cp": A configuracao da proteina a ser especificada, contida no arquivo
@@ -113,7 +114,7 @@ gmx solvate -cp $molecula_newbox -cs spc216.gro -o $molecula_solv -p topol.top;
 # com o campo de forca OPLS-AA
 
 
-gmx grompp -f ions.mdp -c $molecula_solv -p topol.top -o ions.tpr;
+time gmx grompp -f ions.mdp -c $molecula_solv -p topol.top -o ions.tpr;
 
 # Agora temos uma descrição em nível atômico do nosso sistema no 
 # arquivo binário ions.tpr. Vamos passar este arquivo para o genion
@@ -121,7 +122,7 @@ gmx grompp -f ions.mdp -c $molecula_solv -p topol.top -o ions.tpr;
 molecula_solv_ions=${molecula%.pdb*}"_solv_ions.gro";
 echo $molecula_solv_ions;
 
-gmx genion -s ions.tpr -o $molecula_solv_ions -p topol.top -pname NA -nname CL -neutral;
+time gmx genion -s ions.tpr -o $molecula_solv_ions -p topol.top -pname NA -nname CL -neutral;
 
 # Apos executada a linha acima, varias opcoes irao aparecer,
 # no tutorial usa-se a opcao 13 "SOL", para incorporar os ions.
@@ -150,11 +151,11 @@ gmx genion -s ions.tpr -o $molecula_solv_ions -p topol.top -pname NA -nname CL -
 # IMPORTANTE DE NOVO OUTRO ARQUIVO ESPECIFICO DADO PELO TUTORIAL
 # (minim.mdp = http://www.mdtutorials.com/gmx/lysozyme/Files/minim.mdp)
 
-gmx grompp -f minim.mdp -c $molecula_solv_ions -p topol.top -o em.tpr;
+time gmx grompp -f minim.mdp -c $molecula_solv_ions -p topol.top -o em.tpr;
 
 
 # Agora podemos chamar o parametrp mdrun para iniciar a minimizacao de energia
-gmx mdrun -v -deffnm em;
+time gmx mdrun -v -deffnm em;
 
 
 # Parametros
@@ -169,7 +170,7 @@ gmx mdrun -v -deffnm em;
 
 
 # Analisando o arquivo produzido em.edr
-gmx energy -f em.edr -o potential.xvg;
+time gmx energy -f em.edr -o potential.xvg;
 
 # Apos executar digita "10 0", 10 para selecionar o Potencial
 # e 0 para encerrar a entrada. 
@@ -217,14 +218,14 @@ gmx energy -f em.edr -o potential.xvg;
 
 # AQUI USA OUTRO ARQUIVO 
 # .mdp(nvt.mdp = http://www.mdtutorials.com/gmx/lysozyme/Files/nvt.mdp)
-gmx grompp -f nvt.mdp -c em.gro -r em.gro -p topol.top -o nvt.tpr;
+time gmx grompp -f nvt.mdp -c em.gro -r em.gro -p topol.top -o nvt.tpr;
 
 
-gmx mdrun -deffnm nvt;
+time gmx mdrun -deffnm nvt;
 
 
 # Analizando a progressao da temperatura, usando a energia.
-gmx energy -f nvt.edr -o temperatura.xvg;
+time gmx energy -f nvt.edr -o temperatura.xvg;
 
 # Apos a execucao da linha acima escolher "16 0", para selecionar
 # a temperatura do sistema e sair.
@@ -242,21 +243,21 @@ gmx energy -f nvt.edr -o temperatura.xvg;
 # de coordenadas (-c) é a saída final da simulação NVT.
 
 # OUTRO ARQUIVO DADO USANDO .mdp(npt.mdp)
-gmx grompp -f npt.mdp -c nvt.gro -r nvt.gro -t nvt.cpt -p topol.top -o npt.tpr;
+time gmx grompp -f npt.mdp -c nvt.gro -r nvt.gro -t nvt.cpt -p topol.top -o npt.tpr;
 
-gmx mdrun -deffnm npt;
+time gmx mdrun -deffnm npt;
 
 #gmx mdrun -f npt.edr -o pressure.xvg;
 
 # Analizando a progressao da pressao, usando energia
-gmx energy -f npt.edr -o pressure.xvg;
+time gmx energy -f npt.edr -o pressure.xvg;
 
 # Apos a execucao da linha acima digitar "18 0" para 
 # selecionar a pressao e sair do sistema.
 
 # Olhando para a densidade tambem, usando a energia
 # digitando "24 0"
-gmx energy -f npt.edr -o density.xvg;
+time gmx energy -f npt.edr -o density.xvg;
 
 ##### 7- Producao da Dinamica Molecular #####
 
@@ -269,10 +270,10 @@ gmx energy -f npt.edr -o density.xvg;
 # preservadas) para grompp
 
 # USA ARQUIVO .mdp(md.mdp = http://www.mdtutorials.com/gmx/lysozyme/Files/md.mdp)
-gmx grompp -f md.mdp -c npt.gro -t npt.cpt -p topol.top -o md_0_1.tpr;
+time gmx grompp -f md.mdp -c npt.gro -t npt.cpt -p topol.top -o md_0_1.tpr;
 
 # Rodar a simulacao agora
-gmx mdrun -deffnm md_0_1;
+time gmx mdrun -deffnm md_0_1;
 
 
 ##### 8- ANALISE  #####
@@ -288,14 +289,14 @@ gmx mdrun -deffnm md_0_1;
 # "quebrada" ou "saltar" para o outro lado da caixa. Para explicar esses comportamentos, emita o 
 # seguinte:
 
-gmx trjconv -s md_0_1.tpr -f md_0_1.xtc -o md_0_1_noPBC.xtc -pbc mol -center;
+time gmx trjconv -s md_0_1.tpr -f md_0_1.xtc -o md_0_1_noPBC.xtc -pbc mol -center;
 # Selecione 1 ("Proteína") como o grupo a ser centralizado e 0 ("Sistema") para saída. 
 # Faremos todas as nossas análises nesta trajetória "corrigida". Vejamos primeiro a estabilidade 
 # estrutural. GROMACS tem um utilitário embutido para cálculos RMSD chamado rms. Para usar rms, 
 # emita este comando:
 
 
-gmx rms -s md_0_1.tpr -f md_0_1_noPBC.xtc -o rmsd.xvg -tu ns;
+time gmx rms -s md_0_1.tpr -f md_0_1_noPBC.xtc -o rmsd.xvg -tu ns;
 # Escolha 4 ("Backbone") para o ajuste de mínimos quadrados e o grupo para cálculo de RMSD. 
 # O sinalizador -tu exibirá os resultados em termos de ns, mesmo que a trajetória tenha sido 
 # escrita em ps. Isso é feito para clareza da saída (especialmente se você tiver uma simulação 
@@ -304,7 +305,7 @@ gmx rms -s md_0_1.tpr -f md_0_1_noPBC.xtc -o rmsd.xvg -tu ns;
 
 # If we wish to calculate RMSD relative to the crystal structure, we could issue the following:
 
-gmx rms -s em.tpr -f md_0_1_noPBC.xtc -o rmsd_xtal.xvg -tu ns;
+time gmx rms -s em.tpr -f md_0_1_noPBC.xtc -o rmsd_xtal.xvg -tu ns;
 
 
 # O raio de giração de uma proteína é uma medida de sua compacidade. Se uma 
@@ -312,12 +313,14 @@ gmx rms -s em.tpr -f md_0_1_noPBC.xtc -o rmsd_xtal.xvg -tu ns;
 # de Rg. Se uma proteína se desdobrar, seu Rg mudará com o tempo. Vamos analisar o raio de giração 
 # da lisozima em nossa simulação:
 
-gmx gyrate -s md_0_1.tpr -f md_0_1_noPBC.xtc -o gyrate.xvg;
+time gmx gyrate -s md_0_1.tpr -f md_0_1_noPBC.xtc -o gyrate.xvg;
 # Escolha 1  para Proteina
 
 molecula_pdb_final=${molecula%.pdb*}"_FINAL.pdb"
 
 # LINHA PARA EDITAR CRIAR O ARQUIVO PDB
-gmx trjconv -s md_0_1.tpr -f md_0_1.xtc -dump 1000 -o $molecula_pdb_final;
+time gmx trjconv -s md_0_1.tpr -f md_0_1.xtc -dump 1000 -o $molecula_pdb_final;
 
 # -dump é o paramêtro que define o tempo em que irá gerar o arquivo pdb
+
+
