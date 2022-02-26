@@ -41,7 +41,7 @@ molecula_processed=${molecula_clean%clean*}"processed.gro"
 
 echo $molecula_processed;
 
-time gmx pdb2gmx -f $molecula_clean -o $molecula_processed -water spce;
+echo 15 |time gmx pdb2gmx -f $molecula_clean -o $molecula_processed -water spce;
 
 # Explicando os parametros utilizados (ex:-water spce)
 # "-f"(file): Indica que sera passado um arquivo(file), apos esse parametro
@@ -122,7 +122,7 @@ time gmx grompp -f ions.mdp -c $molecula_solv -p topol.top -o ions.tpr;
 molecula_solv_ions=${molecula%.pdb*}"_solv_ions.gro";
 echo $molecula_solv_ions;
 
-time gmx genion -s ions.tpr -o $molecula_solv_ions -p topol.top -pname NA -nname CL -neutral;
+echo 13 | time gmx genion -s ions.tpr -o $molecula_solv_ions -p topol.top -pname NA -nname CL -neutral;
 
 # Apos executada a linha acima, varias opcoes irao aparecer,
 # no tutorial usa-se a opcao 13 "SOL", para incorporar os ions.
@@ -170,7 +170,7 @@ time gmx mdrun -v -deffnm em;
 
 
 # Analisando o arquivo produzido em.edr
-time gmx energy -f em.edr -o potential.xvg;
+echo 10 0 | time gmx energy -f em.edr -o potential.xvg;
 
 # Apos executar digita "10 0", 10 para selecionar o Potencial
 # e 0 para encerrar a entrada. 
@@ -225,7 +225,7 @@ time gmx mdrun -deffnm nvt;
 
 
 # Analizando a progressao da temperatura, usando a energia.
-time gmx energy -f nvt.edr -o temperatura.xvg;
+echo 16 0 | time gmx energy -f nvt.edr -o temperatura.xvg;
 
 # Apos a execucao da linha acima escolher "16 0", para selecionar
 # a temperatura do sistema e sair.
@@ -250,14 +250,14 @@ time gmx mdrun -deffnm npt;
 #gmx mdrun -f npt.edr -o pressure.xvg;
 
 # Analizando a progressao da pressao, usando energia
-time gmx energy -f npt.edr -o pressure.xvg;
+echo 18 0 | time gmx energy -f npt.edr -o pressure.xvg;
 
 # Apos a execucao da linha acima digitar "18 0" para 
 # selecionar a pressao e sair do sistema.
 
 # Olhando para a densidade tambem, usando a energia
 # digitando "24 0"
-time gmx energy -f npt.edr -o density.xvg;
+echo 24 0 | time gmx energy -f npt.edr -o density.xvg;
 
 ##### 7- Producao da Dinamica Molecular #####
 
@@ -289,14 +289,14 @@ time gmx mdrun -deffnm md_0_1;
 # "quebrada" ou "saltar" para o outro lado da caixa. Para explicar esses comportamentos, emita o 
 # seguinte:
 
-time gmx trjconv -s md_0_1.tpr -f md_0_1.xtc -o md_0_1_noPBC.xtc -pbc mol -center;
+echo 1 0 | time gmx trjconv -s md_0_1.tpr -f md_0_1.xtc -o md_0_1_noPBC.xtc -pbc mol -center;
 # Selecione 1 ("Proteína") como o grupo a ser centralizado e 0 ("Sistema") para saída. 
 # Faremos todas as nossas análises nesta trajetória "corrigida". Vejamos primeiro a estabilidade 
 # estrutural. GROMACS tem um utilitário embutido para cálculos RMSD chamado rms. Para usar rms, 
 # emita este comando:
 
 
-time gmx rms -s md_0_1.tpr -f md_0_1_noPBC.xtc -o rmsd.xvg -tu ns;
+echo 4 0 | time gmx rms -s md_0_1.tpr -f md_0_1_noPBC.xtc -o rmsd.xvg -tu ns;
 # Escolha 4 ("Backbone") para o ajuste de mínimos quadrados e o grupo para cálculo de RMSD. 
 # O sinalizador -tu exibirá os resultados em termos de ns, mesmo que a trajetória tenha sido 
 # escrita em ps. Isso é feito para clareza da saída (especialmente se você tiver uma simulação 
@@ -305,7 +305,7 @@ time gmx rms -s md_0_1.tpr -f md_0_1_noPBC.xtc -o rmsd.xvg -tu ns;
 
 # If we wish to calculate RMSD relative to the crystal structure, we could issue the following:
 
-time gmx rms -s em.tpr -f md_0_1_noPBC.xtc -o rmsd_xtal.xvg -tu ns;
+echo 4 0 | time gmx rms -s em.tpr -f md_0_1_noPBC.xtc -o rmsd_xtal.xvg -tu ns;
 
 
 # O raio de giração de uma proteína é uma medida de sua compacidade. Se uma 
@@ -313,14 +313,12 @@ time gmx rms -s em.tpr -f md_0_1_noPBC.xtc -o rmsd_xtal.xvg -tu ns;
 # de Rg. Se uma proteína se desdobrar, seu Rg mudará com o tempo. Vamos analisar o raio de giração 
 # da lisozima em nossa simulação:
 
-time gmx gyrate -s md_0_1.tpr -f md_0_1_noPBC.xtc -o gyrate.xvg;
+echo 1 0 | time gmx gyrate -s md_0_1.tpr -f md_0_1_noPBC.xtc -o gyrate.xvg;
 # Escolha 1  para Proteina
 
 molecula_pdb_final=${molecula%.pdb*}"_FINAL.pdb"
 
 # LINHA PARA EDITAR CRIAR O ARQUIVO PDB
-time gmx trjconv -s md_0_1.tpr -f md_0_1.xtc -dump 1000 -o $molecula_pdb_final;
+echo 1 | time gmx trjconv -s md_0_1.tpr -f md_0_1.xtc -dump 0 -o $molecula_pdb_final;
 
 # -dump é o paramêtro que define o tempo em que irá gerar o arquivo pdb
-
-
