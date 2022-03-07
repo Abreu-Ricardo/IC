@@ -1,0 +1,25 @@
+
+## MEU TESTE FOI COM O PEPT12
+## modelo 29 eh do blastp
+## modelo 12 eh do hhpred
+
+#####(BLASTP)
+Primeiro Passo:
+Ver a proteina homologa usando BLASP, de proteina para proteina.
+Colocar a sua sequencia no campo que pede a sequencia. Selecionar o banco de dados que voce que usar.
+Apos isso ira dar uma lista de resultados com seus respectivos dados, escolher o melhor de acordo com os parametros de "Query Cover", de "E Value" e "Per. ident".
+
+Com isso voce tera o nome da sequencia no NCBI, clicar no link para abrir e conseguir o nome do PDB. Abrir o pdb da proteina para obter o seu arquivo pdb.
+
+Usar os scripts do Basico do link(https://salilab.org/modeller/tutorial/basic.html), pegar os arquivos Align2d.py e TvLDH.ali.
+
+#####(HHPRED)
+Apenas colocar a sua sequencia no campo e, submeter, clicar no ID que voce achar melhor de acordo com os parametros que ele(hhpred) dá.
+
+
+###### ESSE PASSO SERVER TANTO PARA O BLASTP TANTO PARA O HHPRED
+Segundo Passo:
+Trocar o nome da molecula que tem no arquivo Align2d.py pela sua molecula. Executar o mod9.3(ou apendas escreva mod e de tab x2).
+Trocar o nome da molecula que tem no arquivo model-single.py pela sua molecula, e, em starting_model, colocar apos o = 1 sera o inicio, starting_model = 100, significa o numero de modelos gerados
+
+Executar modeller(mod) para Align2d.py e modeller(mod) para model-single.py
