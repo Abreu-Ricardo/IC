@@ -289,11 +289,14 @@ time gmx mdrun -deffnm md_0_1;
 # "quebrada" ou "saltar" para o outro lado da caixa. Para explicar esses comportamentos, emita o 
 # seguinte:
 
-echo 1 0 | time gmx trjconv -s md_0_1.tpr -f md_0_1.xtc -o md_0_1_noPBC.xtc -pbc mol -center;
+
+################################# IMPORTANTE PARA O PEPT NAO FICAR PICOTADO NO PYMOL, CENTRALIZAR A MOLÉCULA NA CAIXA
+echo 1 0 | time gmx trjconv -s md_0_1.tpr  -f md_0_1.xtc -o md_no_pbc.xtc -center -pbc mol -ur compact
 # Selecione 1 ("Proteína") como o grupo a ser centralizado e 0 ("Sistema") para saída. 
 # Faremos todas as nossas análises nesta trajetória "corrigida". Vejamos primeiro a estabilidade 
 # estrutural. GROMACS tem um utilitário embutido para cálculos RMSD chamado rms. Para usar rms, 
 # emita este comando:
+
 
 
 echo 4 0 | time gmx rms -s md_0_1.tpr -f md_0_1_noPBC.xtc -o rmsd.xvg -tu ns;
@@ -319,6 +322,6 @@ echo 1 0 | time gmx gyrate -s md_0_1.tpr -f md_0_1_noPBC.xtc -o gyrate.xvg;
 molecula_pdb_final=${molecula%.pdb*}"_FINAL.pdb"
 
 # LINHA PARA EDITAR CRIAR O ARQUIVO PDB
-echo 1 | time gmx trjconv -s md_0_1.tpr -f md_0_1.xtc -dump 0 -o $molecula_pdb_final;
+echo 1 | time gmx trjconv -s md_0_1.tpr -f md_0_1_noPBC.xtc -dump 0 -o $molecula_pdb_final;
 
 # -dump é o paramêtro que define o tempo em que irá gerar o arquivo pdb
