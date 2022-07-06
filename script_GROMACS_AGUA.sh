@@ -291,7 +291,7 @@ time gmx mdrun -deffnm md_0_1;
 
 
 ################################# IMPORTANTE PARA O PEPT NAO FICAR PICOTADO NO PYMOL, CENTRALIZAR A MOLÉCULA NA CAIXA
-echo 1 0 | time gmx trjconv -s md_0_1.tpr  -f md_0_1.xtc -o md_no_pbc.xtc -center -pbc mol -ur compact
+echo 1 0 | time gmx trjconv -s md_0_1.tpr  -f md_0_1.xtc -o md_0_1_noPBC.xtc -center -pbc mol -ur compact
 # Selecione 1 ("Proteína") como o grupo a ser centralizado e 0 ("Sistema") para saída. 
 # Faremos todas as nossas análises nesta trajetória "corrigida". Vejamos primeiro a estabilidade 
 # estrutural. GROMACS tem um utilitário embutido para cálculos RMSD chamado rms. Para usar rms, 
